@@ -1,0 +1,16 @@
+#+TITLE: Reason layer around reason-mode
+
+* Description
+
+This is some hacks I've done to get a Spacemacs layer around [[https://github.com/facebook/reason/tree/master/editorSupport/emacs][reason-mode]] found in
+the [[https://github.com/facebook/reason][reason]] repo.
+
+* Install
+
+Clone this repo into  =~/.emacs.d/private/reason= and symlink the =reason-mode= folder into
+=~/.emacs.d/private/reason/local/reason-mode=.
+
+To use this configuration layer, add it to your =~/.spacemacs=. You will need to
+add =reason= to the existing =dotspacemacs-configuration-layers= list in this
+file. Also make sure you have =ocaml= layer included, since =reason= uses Merlin
+(and only one layer can be in control of a package).
