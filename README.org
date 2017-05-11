@@ -7,9 +7,7 @@ the [[https://github.com/facebook/reason][reason]] repo.
 
 * Install
 
-Clone this repo into  =~/.emacs.d/private/reason= and symlink the =reason-mode= folder into
-=~/.emacs.d/private/reason/local/reason-mode=.
-
+Clone this repo into  =~/.emacs.d/private/reason=.
 To use this configuration layer, add it to your =~/.spacemacs=. You will need to
 add =reason= to the existing =dotspacemacs-configuration-layers= list in this
 file. Also make sure you have =ocaml= layer included, since =reason= uses Merlin
