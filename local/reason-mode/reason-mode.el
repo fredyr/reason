@@ -179,6 +179,7 @@
   (reason-mode))
 
 (require 'refmt)
+(require 'reason-interaction)
 (provide 'reason-mode)
 
 ;;; reason-mode.el ends here

@@ -28,10 +28,8 @@
                                     (add-hook 'before-save-hook 'refmt-before-save)
                                     (merlin-mode)
                                     (utop-minor-mode)))
-      (setq utop-command "opam config exec -- rtop -emacs")
 
       (evil-leader/set-key-for-mode 'reason-mode "<SPC>" 'company-complete)
-
       ;; (setq refmt-show-errors 'echo)
       (add-to-list 'display-buffer-alist
                    `(,(rx bos "*Refmt Errors*" eos)
@@ -41,6 +39,25 @@
                      (window-height   . 0.15)))
 
       )))
+
+(defun reason/post-init-utop ()
+  (use-package utop
+    :defer t
+    :config
+    (progn
+      (setq utop-command "opam config exec -- rtop -emacs")
+      (setq utop-edit-command nil)
+      (setq utop-prompt 'reason/rtop-prompt)
+      (setq utop-initial-command "let myVar = \"Hello Reason!\";")
+      (setq utop-phrase-terminator ";")
+
+
+      (spacemacs/set-leader-keys-for-major-mode 'reason-mode
+        "er" 'utop-eval-region
+        "eb" 'utop-eval-buffer
+        "ee" 'utop-eval-phrase)
+      ))
+  )
 
 (defun reason/post-init-merlin ()
   (use-package merlin
