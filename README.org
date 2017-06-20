@@ -12,3 +12,10 @@ To use this configuration layer, add it to your =~/.spacemacs=. You will need to
 add =reason= to the existing =dotspacemacs-configuration-layers= list in this
 file. Also make sure you have =ocaml= layer included, since =reason= uses Merlin
 (and only one layer can be in control of a package).
+
+
+
+If you get the following at startup:
+=An error occurred while post-configuring company in layer reason (error: (void-function spacemacs|add-company-backends))=
+
+The spacemacs|add-company-backend function is a recent addition in the develop branch; see https://github.com/syl20bnr/spacemacs/blob/develop/CHANGELOG.develop#breaking-changes and also [[https://github.com/syl20bnr/spacemacs/commit/74fdbb6][syl20bnr/spacemacs@74fdbb6]].
