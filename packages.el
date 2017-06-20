@@ -13,51 +13,75 @@
   '(company
     utop
     (reason-mode :location local)
-    merlin))
+    merlin
+    popwin))
 
 (defun reason/post-init-company ()
-  (spacemacs|add-company-hook merlin-mode))
+  (when (configuration-layer/package-usedp 'merlin)
+    (spacemacs|add-company-backends
+      :backends merlin-company-backend
+      :modes reason-mode))
+  )
 
 (defun reason/init-reason-mode ()
   (use-package reason-mode
-    :mode ("\\.re\\'" . reason-mode)
+    :defer t
+    :mode ("\\.rei?\\'" . reason-mode)
     :init
     (progn
-      ;; (require 'utop)
       (add-hook 'reason-mode-hook (lambda ()
-                                    (add-hook 'before-save-hook 'refmt-before-save)
-                                    (merlin-mode)
-                                    (utop-minor-mode)))
+                                    (add-hook 'before-save-hook 'reason/refmt-before-save nil t)))
+      (add-hook 'reason-mode-hook 'merlin-mode)
+      (add-hook 'reason-mode-hook 'utop-minor-mode)
 
-      (evil-leader/set-key-for-mode 'reason-mode "<SPC>" 'company-complete)
-      ;; (setq refmt-show-errors 'echo)
-      (add-to-list 'display-buffer-alist
-                   `(,(rx bos "*Refmt Errors*" eos)
-                     (display-buffer-pop-up-window display-buffer-in-side-window)
-                     (reusable-frames . visible)
-                     (side            . bottom)
-                     (window-height   . 0.15)))
-
-      )))
-
-(defun reason/post-init-utop ()
-  (use-package utop
-    :defer t
+      (spacemacs|add-toggle reason-auto-refmt
+        :documentation "Toggle automatic refmt on save."
+        :status reason-auto-refmt
+        :on (setq reason-auto-refmt t)
+        :off (setq reason-auto-refmt nil))
+      )
     :config
     (progn
-      (setq utop-command "opam config exec -- rtop -emacs")
-      (setq utop-edit-command nil)
-      (setq utop-prompt 'reason/rtop-prompt)
-      (setq utop-initial-command "let myVar = \"Hello Reason!\";")
-      (setq utop-phrase-terminator ";")
+      (spacemacs/declare-prefix-for-mode 'reason-mode "mc" "compile")
+      (spacemacs/declare-prefix-for-mode 'reason-mode "mt" "toggle")
+      (spacemacs/declare-prefix-for-mode 'reason-mode "me" "errors/eval")
+      (spacemacs/declare-prefix-for-mode 'reason-mode "mg" "goto")
+      (spacemacs/declare-prefix-for-mode 'reason-mode "mh" "help/show")
+      (spacemacs/declare-prefix-for-mode 'reason-mode "mr" "refactor")
+      (spacemacs/declare-prefix-for-mode 'reason-mode "m=" "refmt")
 
+      (spacemacs/set-leader-keys-for-major-mode 'reason-mode
+        "cr" 'refmt
+        "==" 'refmt
+        "tr" 'spacemacs/toggle-reason-auto-refmt)
+      )
+    ))
 
+(defun reason/pre-init-popwin ()
+  (spacemacs|use-package-add-hook popwin
+    :post-config
+    (push '("*Refmt Errors*" :tail t :position bottom :noselect t) popwin:special-display-config)))
+
+(defun reason/pre-init-utop ()
+  (spacemacs|use-package-add-hook utop
+    :post-init
+    (add-hook
+     'reason-mode-hook
+     (lambda ()
+       (setq utop-command "rtop -emacs")
+       (setq utop-edit-command nil)
+       (setq utop-prompt 'reason/rtop-prompt)
+       (setq utop-initial-command "let myVar = \"Hello Reason!\";")
+       (setq utop-phrase-terminator ";")
+       ))
+    :post-config
+    (progn
       (spacemacs/set-leader-keys-for-major-mode 'reason-mode
         "er" 'utop-eval-region
         "eb" 'utop-eval-buffer
         "ee" 'utop-eval-phrase)
-      ))
-  )
+      )
+    ))
 
 (defun reason/post-init-merlin ()
   (use-package merlin
@@ -65,8 +89,6 @@
     :init
     (progn
       (setq merlin-completion-with-doc t)
-      (setq merlin-ac-setup t)
-      (push 'merlin-company-backend company-backends-merlin-mode)
 
       (spacemacs/set-leader-keys-for-major-mode 'reason-mode
         "cp" 'merlin-project-check
@@ -85,7 +107,6 @@
         "ht" 'merlin-type-enclosing
         "hT" 'merlin-type-expr
         "rd" 'merlin-destruct)
-
       )))
 
 ;;; packages.el ends here
