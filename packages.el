@@ -13,7 +13,8 @@
   '(company
     utop
     (reason-mode :location local)
-    merlin
+    (merlin :location (recipe :fetcher github :repo "ocaml/merlin" :commit "v2.5.4" :files ("emacs/*.el")))
+    ;;merlin
     popwin))
 
 (defun reason/post-init-company ()
