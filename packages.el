@@ -15,7 +15,10 @@
     (reason-mode :location local)
     (merlin :location (recipe :fetcher github :repo "ocaml/merlin" :commit "v2.5.4" :files ("emacs/*.el")))
     ;;merlin
-    popwin))
+    popwin
+    flycheck
+    flycheck-ocaml
+    ))
 
 (defun reason/post-init-company ()
   (when (configuration-layer/package-usedp 'merlin)
@@ -34,6 +37,7 @@
                                     (add-hook 'before-save-hook 'reason/refmt-before-save nil t)))
       (add-hook 'reason-mode-hook 'merlin-mode)
       (add-hook 'reason-mode-hook 'utop-minor-mode)
+      (add-hook 'reason-mode-hook 'flycheck-mode)
 
       (spacemacs|add-toggle reason-auto-refmt
         :documentation "Toggle automatic refmt on save."
@@ -109,5 +113,44 @@
         "hT" 'merlin-type-expr
         "rd" 'merlin-destruct)
       )))
+
+(defun flycheck-ocaml-reason-setup ()
+  (with-eval-after-load 'merlin
+    (setq merlin-error-after-save nil)
+
+    (flycheck-define-generic-checker 'reason-merlin
+      "A syntax checker for Reason using Merlin Mode.
+
+    See URL `https://github.com/the-lambda-church/merlin'."
+      :start #'flycheck-ocaml-merlin-start
+      :verify #'flycheck-verify-ocaml-merlin
+      :modes '(reason-mode)
+      :predicate (lambda () (and merlin-mode
+                                 ;; Don't check if Merlin's own checking is
+                                 ;; enabled, to avoid duplicate overlays
+                                 (not merlin-error-after-save))))
+
+    (interactive)
+    (add-to-list 'flycheck-checkers 'reason-merlin)))
+
+(when (configuration-layer/layer-used-p 'syntax-checking)
+  (defun reason/post-init-flycheck ()
+    (spacemacs/enable-flycheck 'reason-mode))
+
+  (if (configuration-layer/layer-used-p 'ocaml)
+
+      (defun reason/post-init-flycheck-ocaml ()
+        (flycheck-ocaml-reason-setup))
+
+    (defun ocaml/init-flycheck-ocaml ()
+      (use-package flycheck-ocaml
+        :if (configuration-layer/package-used-p 'flycheck)
+        :defer t
+        :init
+        (progn
+          (with-eval-after-load 'merlin
+            (setq merlin-error-after-save nil)
+            (flycheck-ocaml-reason-setup)))))))
+
 
 ;;; packages.el ends here
